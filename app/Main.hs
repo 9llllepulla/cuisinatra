@@ -1,6 +1,11 @@
-module Main (main) where
+module Main (
+    main,
+) where
 
-import Lib
+import Cli (cliParser)
+import System.Environment (getArgs)
 
 main :: IO ()
-main = someFunc
+main = do
+    args <- getArgs
+    cliParser args
