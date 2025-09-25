@@ -25,6 +25,8 @@ source-repository head
 
 library
   exposed-modules:
+      Cli
+      Files.FilesIO
       Lib
   other-modules:
       Paths_cuisinatra
@@ -37,9 +39,12 @@ library
       base >=4.7 && <5
     , binary >=0.7 && <0.9
     , bytestring >=0.10 && <0.12
+    , filepath
     , hsexif
     , iconv ==0.4.*
     , text >=0.9
+    , time
+    , unix
   default-language: Haskell2010
 
 executable cuisinatra-exe
@@ -56,9 +61,12 @@ executable cuisinatra-exe
     , binary >=0.7 && <0.9
     , bytestring >=0.10 && <0.12
     , cuisinatra
+    , filepath
     , hsexif
     , iconv ==0.4.*
     , text >=0.9
+    , time
+    , unix
   default-language: Haskell2010
 
 test-suite cuisinatra-test
@@ -76,7 +84,10 @@ test-suite cuisinatra-test
     , binary >=0.7 && <0.9
     , bytestring >=0.10 && <0.12
     , cuisinatra
+    , filepath
     , hsexif
     , iconv ==0.4.*
     , text >=0.9
+    , time
+    , unix
   default-language: Haskell2010

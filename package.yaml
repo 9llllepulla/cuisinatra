@@ -26,6 +26,9 @@ dependencies:
 - hsexif
 - binary >=0.7 && <0.9
 - text >=0.9
+- filepath
+- time
+- unix
 
 ghc-options:
 - -Wall
