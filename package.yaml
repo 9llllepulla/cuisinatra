@@ -29,6 +29,7 @@ dependencies:
 - filepath
 - time
 - unix
+- directory
 
 ghc-options:
 - -Wall
