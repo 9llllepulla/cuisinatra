@@ -31,33 +31,23 @@ flatDirectories :: DirPath -> IO ()
 flatDirectories path =
     do
         contents <- getDirectoryContents path
-        print $ "path: " <> show path
-        print $ "contents: " <> show contents
-        directoryContetns $ map (path <>) contents -- тут проблема маппинга пути
+        directoryContetns $ map (path <>) $ filter (\c -> not (c `endswith` ".") && not (c `endswith` "..")) contents
 
 data Path a = File a | Dir a
 
 directoryContetns :: [FilePath] -> IO ()
 directoryContetns [] = return ()
 directoryContetns (path : paths) = do
-    let p =
-            if path `endswith` "." && path `endswith` ".."
-                then Nothing
-                else Just path
-    mPath <- toPath p
+    mPath <- toPath path
     printFile mPath
     directoryContetns paths
 
-toPath :: Maybe FilePath -> IO (Maybe (Path FilePath))
-toPath Nothing = return Nothing
-toPath (Just path) = do
+toPath :: FilePath -> IO (Maybe (Path FilePath))
+toPath path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
-    print $ "path: " <> show path
-    print $ "isFile: " <> show isFile
-    print $ "isDir: " <> show isDir
     if isDir
-        then return $ Just $ Dir path
+        then return $ Just $ Dir $ path <> "/"
         else
             if isFile
                 then return $ Just $ File path
