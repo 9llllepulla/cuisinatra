@@ -1,15 +1,12 @@
-module Files.FilesIO (
+module Files.FlatDirectory (
     printFileExt,
     flatDirectories,
 ) where
 
-import Control.Monad (guard, when)
 import Data.List.Utils
-import GHC.Base (IO (IO))
-import System.Directory (canonicalizePath, doesDirectoryExist, doesFileExist, getDirectoryContents)
+import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.FilePath (takeExtensions, takeFileName)
 import System.IO ()
-import System.Posix (fileMode, fileSize, getFileStatus, isDirectory, modificationTime)
 
 printFileExt :: FilePath -> IO ()
 printFileExt path = do
@@ -18,7 +15,7 @@ printFileExt path = do
     putStrLn $ name ++ " ext: " ++ ext
 
 {-
-    Алгоритм рекурсивного уплощения директорий:
+    Алгоритм уплощения директорий:
     0. Проверяем все файлы уровня
     1. Проверяем является ли файл директорией
     2. Если да - вход в диреторию, выполнение с п.1
@@ -27,11 +24,14 @@ printFileExt path = do
 -}
 type DirPath = String
 
+isParentDir :: DirPath -> Bool
+isParentDir = flip endswith ".."
+
 flatDirectories :: DirPath -> IO ()
 flatDirectories path =
     do
         contents <- getDirectoryContents path
-        directoryContetns $ map (path <>) $ filter (\c -> not (c `endswith` ".") && not (c `endswith` "..")) contents
+        directoryContetns $ map (path <>) $ filter (not . isParentDir) contents
 
 data Path a = File a | Dir a
 
