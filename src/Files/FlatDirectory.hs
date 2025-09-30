@@ -23,21 +23,20 @@ data Path = File FilePath | Dir FilePath
     4. Если уровень родительский - ничего не делаем
 -}
 flatDirectories :: FilePath -> IO [FilePath]
-flatDirectories path =
-    do
-        dirContents <- getDirectoryContents path
-        directoryContetns $ map (path <>) $ fromContents dirContents
+flatDirectories path = do
+    contents <- getDirectoryContents path
+    directoryContetns $ map (path <>) $ excludeParentDir contents
   where
-    fromContents = filter isNotParentDir
+    excludeParentDir = filter isNotParentDir
     isNotParentDir = not . flip endswith ".."
 
 directoryContetns :: [FilePath] -> IO [FilePath]
 directoryContetns [] = return []
 directoryContetns (path : paths) = do
     mPath <- toPath path
-    fPaths <- printFile mPath
+    filesPaths <- findFilePath mPath
     restPaths <- directoryContetns paths
-    return $ fPaths ++ restPaths
+    return $ filesPaths ++ restPaths
 
 toPath :: FilePath -> IO (Maybe Path)
 toPath path = do
@@ -50,7 +49,7 @@ toPath path = do
                 then return $ Just $ File path
                 else return Nothing
 
-printFile :: Maybe Path -> IO [FilePath]
-printFile Nothing = return []
-printFile (Just (Dir path)) = flatDirectories path
-printFile (Just (File path)) = return [path]
+findFilePath :: Maybe Path -> IO [FilePath]
+findFilePath Nothing = return []
+findFilePath (Just (Dir path)) = flatDirectories path
+findFilePath (Just (File path)) = return [path]
