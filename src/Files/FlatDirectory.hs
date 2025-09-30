@@ -6,8 +6,7 @@ import Data.List.Utils
 import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.IO ()
 
-type DirPath = String
-data Path a = File a | Dir a
+data Path = File FilePath | Dir FilePath
 
 {-
     Алгоритм уплощения директорий:
@@ -18,10 +17,10 @@ data Path a = File a | Dir a
     4. Если уровень родительский - ничего не делаем
 -}
 
-isParentDir :: DirPath -> Bool
+isParentDir :: FilePath -> Bool
 isParentDir = flip endswith ".."
 
-flatDirectories :: DirPath -> IO ()
+flatDirectories :: FilePath -> IO ()
 flatDirectories path =
     do
         contents <- getDirectoryContents path
@@ -34,7 +33,7 @@ directoryContetns (path : paths) = do
     printFile mPath
     directoryContetns paths
 
-toPath :: FilePath -> IO (Maybe (Path FilePath))
+toPath :: FilePath -> IO (Maybe Path)
 toPath path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
@@ -45,7 +44,7 @@ toPath path = do
                 then return $ Just $ File path
                 else return Nothing
 
-printFile :: Maybe (Path FilePath) -> IO ()
+printFile :: Maybe Path -> IO ()
 printFile Nothing = return ()
 printFile (Just (Dir path)) = flatDirectories path
 printFile (Just (File path)) = putStrLn path
