@@ -17,14 +17,14 @@ data Path = File FilePath | Dir FilePath
     4. Если уровень родительский - ничего не делаем
 -}
 
-isParentDir :: FilePath -> Bool
-isParentDir = flip endswith ".."
-
 flatDirectories :: FilePath -> IO ()
 flatDirectories path =
     do
-        contents <- getDirectoryContents path
-        directoryContetns $ map (path <>) $ filter (not . isParentDir) contents
+        dirContents <- getDirectoryContents path
+        directoryContetns $ map (path <>) $ fromContents dirContents
+  where
+    fromContents = filter isNotParentDir
+    isNotParentDir = not . flip endswith ".."
 
 directoryContetns :: [FilePath] -> IO ()
 directoryContetns [] = return ()
