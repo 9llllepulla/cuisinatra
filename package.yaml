@@ -30,6 +30,7 @@ dependencies:
 - time
 - unix
 - directory
+- MissingH
 
 ghc-options:
 - -Wall
