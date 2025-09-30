@@ -4,7 +4,9 @@ module Files.FilesIO (
 ) where
 
 import Control.Monad (guard, when)
-import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents)
+import Data.List.Utils
+import GHC.Base (IO (IO))
+import System.Directory (canonicalizePath, doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.FilePath (takeExtensions, takeFileName)
 import System.IO ()
 import System.Posix (fileMode, fileSize, getFileStatus, isDirectory, modificationTime)
@@ -29,16 +31,39 @@ flatDirectories :: DirPath -> IO ()
 flatDirectories path =
     do
         contents <- getDirectoryContents path
-        directoryContetns $ filter (\c -> c /= "." && c /= "..") contents
+        print $ "path: " <> show path
+        print $ "contents: " <> show contents
+        directoryContetns $ map (path <>) contents -- тут проблема маппинга пути
 
--- mapM_ putStrLn contents
+data Path a = File a | Dir a
 
 directoryContetns :: [FilePath] -> IO ()
 directoryContetns [] = return ()
-directoryContetns (path : paths) = undefined
+directoryContetns (path : paths) = do
+    let p =
+            if path `endswith` "." && path `endswith` ".."
+                then Nothing
+                else Just path
+    mPath <- toPath p
+    printFile mPath
+    directoryContetns paths
 
-isFile :: FilePath -> Bool
-isFile path = undefined
+toPath :: Maybe FilePath -> IO (Maybe (Path FilePath))
+toPath Nothing = return Nothing
+toPath (Just path) = do
+    isDir <- doesDirectoryExist path
+    isFile <- doesFileExist path
+    print $ "path: " <> show path
+    print $ "isFile: " <> show isFile
+    print $ "isDir: " <> show isDir
+    if isDir
+        then return $ Just $ Dir path
+        else
+            if isFile
+                then return $ Just $ File path
+                else return Nothing
 
-isDir :: FilePath -> Bool
-isDir path = undefined
+printFile :: Maybe (Path FilePath) -> IO ()
+printFile Nothing = return ()
+printFile (Just (Dir path)) = flatDirectories path
+printFile (Just (File path)) = putStrLn path
