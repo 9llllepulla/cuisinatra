@@ -8,9 +8,7 @@ import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents
 import System.IO ()
 
 printFiles :: FilePath -> IO ()
-printFiles path = do
-    dirs <- flatDirectories path
-    mapM_ putStrLn dirs
+printFiles path = flatDirectories path >>= mapM_ putStrLn
 
 data Path = File FilePath | Dir FilePath
 
