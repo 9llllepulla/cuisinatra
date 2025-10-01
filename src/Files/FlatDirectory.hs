@@ -10,7 +10,7 @@ import System.IO ()
 printFiles :: FilePath -> IO ()
 printFiles path = flatDirectories path >>= mapM_ putStrLn
 
-data Path = File FilePath | Dir FilePath
+data Path a = File a | Dir a | Empty deriving (Show)
 
 {-
     Алгоритм уплощения директорий:
@@ -25,8 +25,7 @@ flatDirectories path = do
     contents <- getDirectoryContents path
     directoryContetns $ map (path <>) $ excludeParentDir contents
   where
-    excludeParentDir = filter isNotParentDir
-    isNotParentDir = not . flip endswith ".."
+    excludeParentDir = filter $ not . flip endswith ".."
 
 directoryContetns :: [FilePath] -> IO [FilePath]
 directoryContetns [] = return []
@@ -36,18 +35,18 @@ directoryContetns (path : paths) = do
     restPaths <- directoryContetns paths
     return $ filesPaths ++ restPaths
 
-toPath :: FilePath -> IO (Maybe Path)
+toPath :: FilePath -> IO (Path FilePath)
 toPath path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then return $ Just $ Dir $ path <> "/"
+        then return $ Dir $ path <> "/"
         else
             if isFile
-                then return $ Just $ File path
-                else return Nothing
+                then return $ File path
+                else return Empty
 
-findFilePath :: Maybe Path -> IO [FilePath]
-findFilePath Nothing = return []
-findFilePath (Just (Dir path)) = flatDirectories path
-findFilePath (Just (File path)) = return [path]
+findFilePath :: Path FilePath -> IO [FilePath]
+findFilePath Empty = return []
+findFilePath (Dir path) = flatDirectories path
+findFilePath (File path) = return [path]
