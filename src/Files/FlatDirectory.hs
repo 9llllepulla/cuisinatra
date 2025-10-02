@@ -25,17 +25,12 @@ type RootDir = FilePath
 flatDirectories :: RootDir -> IO [FilePath]
 flatDirectories rootDir = do
     rootContents <- getDirectoryContents rootDir
-    getDirContetns $ map (rootDir <>) $ filterParentDir rootContents
+    let contents = map (rootDir <>) $ filterParentDir rootContents
+    paths <- mapM toPath contents
+    fPaths <- mapM findFilesPaths paths
+    return $ concat fPaths
   where
     filterParentDir = filter $ not . flip endswith ".."
-
-getDirContetns :: [FilePath] -> IO [FilePath]
-getDirContetns [] = return []
-getDirContetns (path : paths) = do
-    mPath <- toPath path
-    filesPaths <- findFilesPaths mPath
-    restPaths <- getDirContetns paths
-    return $ filesPaths ++ restPaths
 
 toPath :: FilePath -> IO (Path FilePath)
 toPath path = do
