@@ -12,6 +12,8 @@ printFiles path = flatDirectories path >>= mapM_ putStrLn
 
 data Path a = File a | Dir a | Empty deriving (Show)
 
+type RootDir = FilePath
+
 {-
     Алгоритм уплощения директорий:
     0. Проверяем все файлы уровня
@@ -20,19 +22,19 @@ data Path a = File a | Dir a | Empty deriving (Show)
     3. Иначе - переносим все файлы выше на уровень если этот уровень не корневой
     4. Если уровень родительский - ничего не делаем
 -}
-flatDirectories :: FilePath -> IO [FilePath]
-flatDirectories path = do
-    contents <- getDirectoryContents path
-    directoryContetns $ map (path <>) $ excludeParentDir contents
+flatDirectories :: RootDir -> IO [FilePath]
+flatDirectories rootDir = do
+    rootContents <- getDirectoryContents rootDir
+    getDirContetns $ map (rootDir <>) $ filterParentDir rootContents
   where
-    excludeParentDir = filter $ not . flip endswith ".."
+    filterParentDir = filter $ not . flip endswith ".."
 
-directoryContetns :: [FilePath] -> IO [FilePath]
-directoryContetns [] = return []
-directoryContetns (path : paths) = do
+getDirContetns :: [FilePath] -> IO [FilePath]
+getDirContetns [] = return []
+getDirContetns (path : paths) = do
     mPath <- toPath path
-    filesPaths <- findFilePath mPath
-    restPaths <- directoryContetns paths
+    filesPaths <- findFilesPaths mPath
+    restPaths <- getDirContetns paths
     return $ filesPaths ++ restPaths
 
 toPath :: FilePath -> IO (Path FilePath)
@@ -46,7 +48,7 @@ toPath path = do
                 then return $ File path
                 else return Empty
 
-findFilePath :: Path FilePath -> IO [FilePath]
-findFilePath Empty = return []
-findFilePath (Dir path) = flatDirectories path
-findFilePath (File path) = return [path]
+findFilesPaths :: Path FilePath -> IO [FilePath]
+findFilesPaths Empty = return []
+findFilesPaths (Dir path) = flatDirectories path
+findFilesPaths (File path) = return [path]
