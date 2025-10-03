@@ -1,3 +1,11 @@
+{-
+    Алгоритм уплощения директорий:
+    0. Проверяем все файлы уровня
+    1. Проверяем является ли файл директорией
+    2. Если да - вход в диреторию, выполнение п.0
+    3. Иначе - переносим все файлы выше на уровень если этот уровень не корневой
+    4. Если уровень родительский - ничего не делаем
+-}
 module Files.FlatDirectory (
     flatDirectories,
     printFiles,
@@ -10,26 +18,18 @@ import System.IO ()
 printFiles :: FilePath -> IO ()
 printFiles path = flatDirectories path >>= mapM_ putStrLn
 
-type RootDir = FilePath
+type DirPath = FilePath
 
-{-
-    Алгоритм уплощения директорий:
-    0. Проверяем все файлы уровня
-    1. Проверяем является ли файл директорией
-    2. Если да - вход в диреторию, выполнение с п.1
-    3. Иначе - переносим все файлы выше на уровень если этот уровень не корневой
-    4. Если уровень родительский - ничего не делаем
--}
-flatDirectories :: RootDir -> IO [FilePath]
-flatDirectories rootDir = do
-    rootContents <- getDirectoryContents rootDir
-    let contents = map (rootDir <>) $ filterParentDir rootContents
-    mconcat $ map toPath contents
+flatDirectories :: DirPath -> IO [FilePath]
+flatDirectories dir = do
+    contents <- getDirectoryContents dir
+    let fullPathContents = map (dir <>) $ getNotParentDirContentsFrom contents
+    mconcat $ map getFilesPaths fullPathContents
   where
-    filterParentDir = filter $ not . flip endswith ".."
+    getNotParentDirContentsFrom = filter $ not . flip endswith ".."
 
-toPath :: FilePath -> IO [FilePath]
-toPath path = do
+getFilesPaths :: FilePath -> IO [FilePath]
+getFilesPaths path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
