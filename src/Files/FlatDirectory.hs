@@ -10,8 +10,6 @@ import System.IO ()
 printFiles :: FilePath -> IO ()
 printFiles path = flatDirectories path >>= mapM_ putStrLn
 
-data Path a = File a | Dir a | Empty deriving (Show)
-
 type RootDir = FilePath
 
 {-
@@ -27,23 +25,17 @@ flatDirectories rootDir = do
     rootContents <- getDirectoryContents rootDir
     let contents = map (rootDir <>) $ filterParentDir rootContents
     paths <- mapM toPath contents
-    fPaths <- mapM findFilesPaths paths
-    return $ concat fPaths
+    return $ concat paths
   where
     filterParentDir = filter $ not . flip endswith ".."
 
-toPath :: FilePath -> IO (Path FilePath)
+toPath :: FilePath -> IO [FilePath]
 toPath path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then return $ Dir $ path <> "/"
+        then flatDirectories $ path <> "/"
         else
             if isFile
-                then return $ File path
-                else return Empty
-
-findFilesPaths :: Path FilePath -> IO [FilePath]
-findFilesPaths Empty = return []
-findFilesPaths (Dir path) = flatDirectories path
-findFilesPaths (File path) = return [path]
+                then return [path]
+                else return []
