@@ -7,7 +7,7 @@
     4. Если уровень родительский - ничего не делаем
 -}
 module Files.FlatDirectory (
-    flatDirectories,
+    getAllFilesPaths,
     printFiles,
 ) where
 
@@ -16,24 +16,24 @@ import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents
 import System.IO ()
 
 printFiles :: FilePath -> IO ()
-printFiles path = flatDirectories path >>= mapM_ putStrLn
+printFiles path = getAllFilesPaths path >>= mapM_ putStrLn
 
 type DirPath = FilePath
 
-flatDirectories :: DirPath -> IO [FilePath]
-flatDirectories dir = do
+getAllFilesPaths :: DirPath -> IO [FilePath]
+getAllFilesPaths dir = do
     contents <- getDirectoryContents dir
     let fullPathContents = map (dir <>) $ getNotParentDirContentsFrom contents
-    mconcat $ map getFilesPaths fullPathContents
+    mconcat $ map pathsDefinition fullPathContents
   where
     getNotParentDirContentsFrom = filter $ not . flip endswith ".."
 
-getFilesPaths :: FilePath -> IO [FilePath]
-getFilesPaths path = do
+pathsDefinition :: FilePath -> IO [FilePath]
+pathsDefinition path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then flatDirectories $ path <> "/"
+        then getAllFilesPaths $ path <> "/"
         else
             if isFile
                 then return [path]
