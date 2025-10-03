@@ -24,8 +24,7 @@ flatDirectories :: RootDir -> IO [FilePath]
 flatDirectories rootDir = do
     rootContents <- getDirectoryContents rootDir
     let contents = map (rootDir <>) $ filterParentDir rootContents
-    paths <- mapM toPath contents
-    return $ concat paths
+    mconcat $ map toPath contents
   where
     filterParentDir = filter $ not . flip endswith ".."
 
