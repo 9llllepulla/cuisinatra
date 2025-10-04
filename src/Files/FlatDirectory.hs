@@ -7,7 +7,6 @@
     4. Если уровень родительский - ничего не делаем
 -}
 module Files.FlatDirectory (
-    getAllFilesPaths,
     printFiles,
 ) where
 
@@ -23,13 +22,13 @@ type DirPath = FilePath
 getAllFilesPaths :: DirPath -> IO [FilePath]
 getAllFilesPaths dir = do
     contents <- getDirectoryContents dir
-    let fullPathContents = map (dir <>) $ getNotParentDirContentsFrom contents
-    mconcat $ map pathsDefinition fullPathContents
+    let fullPaths = map (dir <>) $ getNotParentDirContentsFrom contents
+    mconcat $ map extractFilesPaths fullPaths
   where
     getNotParentDirContentsFrom = filter $ not . flip endswith ".."
 
-pathsDefinition :: FilePath -> IO [FilePath]
-pathsDefinition path = do
+extractFilesPaths :: FilePath -> IO [FilePath]
+extractFilesPaths path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
