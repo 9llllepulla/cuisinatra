@@ -1,4 +1,4 @@
-{-
+{- |
     Алгоритм уплощения директорий:
     0. Проверяем все файлы уровня
     1. Проверяем является ли файл директорией
@@ -10,7 +10,7 @@ module Files.FlatDirectory (
     printFiles,
 ) where
 
-import Data.List.Utils
+import Data.List.Utils (endswith)
 import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.IO ()
 
@@ -19,6 +19,9 @@ printFiles path = getAllFilesPaths path >>= mapM_ putStrLn
 
 type DirPath = FilePath
 
+{- |
+    Получаем все файлы дерева директории (со всеми поддиректориями)
+-}
 getAllFilesPaths :: DirPath -> IO [FilePath]
 getAllFilesPaths dir = do
     contents <- getDirectoryContents dir
