@@ -14,18 +14,19 @@ import Data.List.Utils (endswith)
 import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.IO ()
 
+-- todo нужно делать через extractFilesPaths
 printFiles :: FilePath -> IO ()
-printFiles path = getAllFilesPaths path >>= mapM_ putStrLn
+printFiles path = getAllFilesPaths (DirPath path) >>= mapM_ putStrLn
 
-type DirPath = FilePath
+newtype DirPath = DirPath FilePath
 
 {- |
     Получаем все файлы дерева директории (со всеми поддиректориями)
 -}
 getAllFilesPaths :: DirPath -> IO [FilePath]
-getAllFilesPaths dir = do
-    contents <- getDirectoryContents dir
-    let fullPaths = map (dir <>) $ getNotParentDirContentsFrom contents
+getAllFilesPaths (DirPath path) = do
+    contents <- getDirectoryContents path
+    let fullPaths = map (path <>) $ getNotParentDirContentsFrom contents
     mconcat $ map extractFilesPaths fullPaths
   where
     getNotParentDirContentsFrom = filter $ not . flip endswith ".."
@@ -35,7 +36,7 @@ extractFilesPaths path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then getAllFilesPaths $ path <> "/"
+        then getAllFilesPaths $ DirPath $ path <> "/"
         else
             if isFile
                 then return [path]
