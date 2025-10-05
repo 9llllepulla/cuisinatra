@@ -16,7 +16,7 @@ import System.IO ()
 
 -- todo нужно делать через extractFilesPaths
 printFiles :: FilePath -> IO ()
-printFiles path = getAllFilesPaths (DirPath path) >>= mapM_ putStrLn
+printFiles path = extractFilesPaths path >>= mapM_ putStrLn
 
 newtype DirPath = DirPath FilePath
 
@@ -36,8 +36,13 @@ extractFilesPaths path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then getAllFilesPaths $ DirPath $ path <> "/"
+        then getAllFilesPaths $ DirPath path'
         else
             if isFile
                 then return [path]
                 else return []
+  where
+    path' =
+        if "/" `endswith` path
+            then path
+            else path <> "/"
