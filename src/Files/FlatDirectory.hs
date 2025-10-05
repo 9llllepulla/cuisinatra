@@ -14,22 +14,10 @@ import Data.List.Utils (endswith)
 import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents)
 import System.IO ()
 
--- todo нужно делать через extractFilesPaths
 printFiles :: FilePath -> IO ()
 printFiles path = extractFilesPaths path >>= mapM_ putStrLn
 
 newtype DirPath = DirPath FilePath
-
-{- |
-    Получаем все файлы дерева директории (со всеми поддиректориями)
--}
-getAllFilesPaths :: DirPath -> IO [FilePath]
-getAllFilesPaths (DirPath path) = do
-    contents <- getDirectoryContents path
-    let fullPaths = map (path <>) $ getNotParentDirContentsFrom contents
-    mconcat $ map extractFilesPaths fullPaths
-  where
-    getNotParentDirContentsFrom = filter $ not . flip endswith ".."
 
 extractFilesPaths :: FilePath -> IO [FilePath]
 extractFilesPaths path = do
@@ -46,3 +34,14 @@ extractFilesPaths path = do
         if "/" `endswith` path
             then path
             else path <> "/"
+
+{- |
+    Получаем все файлы дерева директории (со всеми поддиректориями)
+-}
+getAllFilesPaths :: DirPath -> IO [FilePath]
+getAllFilesPaths (DirPath path) = do
+    contents <- getDirectoryContents path
+    let fullPaths = map (path <>) $ getNotParentDirContentsFrom contents
+    mconcat $ map extractFilesPaths fullPaths
+  where
+    getNotParentDirContentsFrom = filter $ not . flip endswith ".."
