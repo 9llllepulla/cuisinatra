@@ -31,6 +31,7 @@ dependencies:
 - unix
 - directory
 - MissingH
+- extra
 
 ghc-options:
 - -Wall

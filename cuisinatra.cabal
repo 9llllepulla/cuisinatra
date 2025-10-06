@@ -41,6 +41,7 @@ library
     , binary >=0.7 && <0.9
     , bytestring >=0.10 && <0.12
     , directory
+    , extra
     , filepath
     , hsexif
     , iconv ==0.4.*
@@ -65,6 +66,7 @@ executable cuisinatra-exe
     , bytestring >=0.10 && <0.12
     , cuisinatra
     , directory
+    , extra
     , filepath
     , hsexif
     , iconv ==0.4.*
@@ -90,6 +92,7 @@ test-suite cuisinatra-test
     , bytestring >=0.10 && <0.12
     , cuisinatra
     , directory
+    , extra
     , filepath
     , hsexif
     , iconv ==0.4.*
