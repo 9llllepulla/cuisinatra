@@ -65,7 +65,7 @@ moveFilesToDirectory :: [FilePath] -> DirPath -> IO [FilePath]
 moveFilesToDirectory paths dir = do
     let oldNewPairs = oldAndNewPaths dir paths
     mapM_ (\(old, new) -> renameFile old new) oldNewPairs
-    return $ map fst oldNewPairs
+    return $ map snd oldNewPairs
 
 oldAndNewPaths :: DirPath -> [FilePath] -> [(FilePath, FilePath)]
 oldAndNewPaths (DirPath dirPath) = map (\path -> (path, newName path))
