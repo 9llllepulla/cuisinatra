@@ -8,11 +8,18 @@ import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents
 import System.FilePath (takeFileName)
 import System.IO ()
 
+{-
+    todo
+    2. Фильтрация по 1 условию получаемых файлов
+    3. Заменить проверку родительской директории ".." на проверку пути ?
+-}
 printFiles :: FilePath -> IO ()
 printFiles path = extractFilesPaths path >>= mapM_ putStrLn
 
 moveFiles :: [FilePath] -> FilePath -> IO ()
-moveFiles paths dir = moveFilesToDirectory paths (DirPath dir)
+moveFiles paths dir = do
+    newPaths <- moveFilesToDirectory paths (DirPath dir)
+    mapM_ putStrLn newPaths
 
 newtype DirPath = DirPath FilePath
 
@@ -52,15 +59,15 @@ getAllFilesPaths (DirPath path) = do
     getNotParentDirContentsFrom = filter $ not . flip endswith ".."
 
 {-
-    todo
-    2. Фильтрация по 1 условию получаемых файлов
-    3. Заменить проверку родительской директории ".." на проверку пути ?
+     Перемещение файлов в новую директорию
 -}
+moveFilesToDirectory :: [FilePath] -> DirPath -> IO [FilePath]
+moveFilesToDirectory paths dir = do
+    let newAndOldPaths = newOldPaths dir paths
+    mapM_ (\(new, old) -> renameFile old new) newAndOldPaths
+    return $ map fst newAndOldPaths
 
--- Перемещение файла
--- todo нужно возвращать список файлов
-moveFilesToDirectory :: [FilePath] -> DirPath -> IO ()
-moveFilesToDirectory paths (DirPath dirPath) = do
-    mapM_ (\oldName -> renameFile oldName (newName oldName)) paths
+newOldPaths :: DirPath -> [FilePath] -> [(FilePath, FilePath)]
+newOldPaths (DirPath dirPath) = map (\path -> (newName path, path))
   where
     newName path = dirPath <> takeFileName path
