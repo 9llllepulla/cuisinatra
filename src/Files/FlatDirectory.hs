@@ -17,9 +17,9 @@ printFiles :: FilePath -> IO ()
 printFiles path = extractFilesPaths path >>= mapM_ putStrLn
 
 moveFiles :: [FilePath] -> FilePath -> IO ()
-moveFiles paths dir = moveFilesToDirectory paths (DirPath dir) >>= mapM_ putStrLn
+moveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
 
-newtype DirPath = DirPath FilePath
+newtype Directory = Directory FilePath
 
 {-
     Алгоритм извлечения файлов из директорий:
@@ -34,7 +34,7 @@ extractFilesPaths path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then getAllFilesPaths $ DirPath path'
+        then getAllFilesPaths $ Directory path'
         else
             if isFile
                 then return [path]
@@ -48,24 +48,24 @@ extractFilesPaths path = do
 {- |
     Получаем все файлы дерева директории (со всеми поддиректориями)
 -}
-getAllFilesPaths :: DirPath -> IO [FilePath]
-getAllFilesPaths (DirPath path) = do
+getAllFilesPaths :: Directory -> IO [FilePath]
+getAllFilesPaths (Directory path) = do
     contents <- getDirectoryContents path
-    let fullPaths = map (path <>) $ getNotParentDirContentsFrom contents
+    let fullPaths = map (path <>) $ withoutParentDirContents contents
     mconcat $ map extractFilesPaths fullPaths
   where
-    getNotParentDirContentsFrom = filter $ not . flip endswith ".."
+    withoutParentDirContents = filter $ not . flip endswith ".."
 
 {-
      Перемещение файлов в новую директорию
 -}
-moveFilesToDirectory :: [FilePath] -> DirPath -> IO [FilePath]
-moveFilesToDirectory paths dir = do
-    let oldNewPairs = oldAndNewPaths dir paths
+moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
+moveFilesToDirectory files dir = do
+    let oldNewPairs = oldAndNewPaths dir files
     mapM_ (\(old, new) -> renameFile old new) oldNewPairs
     return $ map snd oldNewPairs
 
-oldAndNewPaths :: DirPath -> [FilePath] -> [(FilePath, FilePath)]
-oldAndNewPaths (DirPath dirPath) = map (\path -> (path, newName path))
+oldAndNewPaths :: Directory -> [FilePath] -> [(FilePath, FilePath)]
+oldAndNewPaths (Directory dir) = map (\oldName -> (oldName, toNewName oldName))
   where
-    newName path = dirPath <> takeFileName path
+    toNewName file = dir <> takeFileName file
