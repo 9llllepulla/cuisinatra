@@ -63,11 +63,11 @@ getAllFilesPaths (DirPath path) = do
 -}
 moveFilesToDirectory :: [FilePath] -> DirPath -> IO [FilePath]
 moveFilesToDirectory paths dir = do
-    let newAndOld = newAndOldPaths dir paths
-    mapM_ (\(new, old) -> renameFile old new) newAndOld
-    return $ map fst newAndOld
+    let oldNewPairs = oldAndNewPaths dir paths
+    mapM_ (\(old, new) -> renameFile old new) oldNewPairs
+    return $ map fst oldNewPairs
 
-newAndOldPaths :: DirPath -> [FilePath] -> [(FilePath, FilePath)]
-newAndOldPaths (DirPath dirPath) = map (\path -> (newName path, path))
+oldAndNewPaths :: DirPath -> [FilePath] -> [(FilePath, FilePath)]
+oldAndNewPaths (DirPath dirPath) = map (\path -> (path, newName path))
   where
     newName path = dirPath <> takeFileName path
