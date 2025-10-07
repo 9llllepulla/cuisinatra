@@ -17,9 +17,7 @@ printFiles :: FilePath -> IO ()
 printFiles path = extractFilesPaths path >>= mapM_ putStrLn
 
 moveFiles :: [FilePath] -> FilePath -> IO ()
-moveFiles paths dir = do
-    newPaths <- moveFilesToDirectory paths (DirPath dir)
-    mapM_ putStrLn newPaths
+moveFiles paths dir = moveFilesToDirectory paths (DirPath dir) >>= mapM_ putStrLn
 
 newtype DirPath = DirPath FilePath
 
