@@ -23,6 +23,8 @@ testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ p
 type FileType = String
 newtype Directory = Directory FilePath
 
+-- todo добавить перемещение отфильтрованных по типу фалов
+
 extractTypeFiles :: FileType -> FilePath -> IO [FilePath]
 extractTypeFiles fType path = do
     files <- extractFiles path
@@ -30,6 +32,7 @@ extractTypeFiles fType path = do
 
 {- |
     Фильтрация по типу файла
+    -- todo заменить на проверку по типу файла
 -}
 filesFilter :: FileType -> [FilePath] -> [FilePath]
 filesFilter fileType = filter $ \path -> fileType `endswith` path
