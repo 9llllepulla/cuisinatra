@@ -1,6 +1,6 @@
 module Files.FlatDirectory (
-    printFiles,
-    moveFiles,
+    testPrintFiles,
+    testMoveFiles,
 ) where
 
 import Data.List.Utils (endswith)
@@ -8,16 +8,11 @@ import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents
 import System.FilePath (takeFileName)
 import System.IO ()
 
-{-
-    todo
-    2. Фильтрация по 1 условию получаемых файлов
-    3. Заменить проверку родительской директории ".." на проверку пути ?
--}
-printFiles :: FilePath -> IO ()
-printFiles path = extractFilesPaths path >>= mapM_ putStrLn
+testPrintFiles :: FilePath -> IO ()
+testPrintFiles path = extractFilesPaths path >>= mapM_ putStrLn
 
-moveFiles :: [FilePath] -> FilePath -> IO ()
-moveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
+testMoveFiles :: [FilePath] -> FilePath -> IO ()
+testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
 
 newtype Directory = Directory FilePath
 
@@ -69,3 +64,12 @@ oldAndNewPaths :: Directory -> [FilePath] -> [(FilePath, FilePath)]
 oldAndNewPaths (Directory dir) = map (\oldName -> (oldName, toNewName oldName))
   where
     toNewName file = dir <> takeFileName file
+
+{-
+    todo
+    2. Фильтрация по 1 условию получаемых файлов
+-}
+type FileType = String
+
+filesFilter :: FileType -> [FilePath] -> [FilePath]
+filesFilter fileType = filter $ \path -> fileType `endswith` path
