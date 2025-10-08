@@ -1,6 +1,9 @@
 module Files.FlatDirectory (
-    testPrintFiles,
+    testExtractFiles,
     testMoveFiles,
+    testExtractTypeFiles,
+    extractFiles,
+    extractTypeFiles,
 ) where
 
 import Data.List.Utils (endswith)
@@ -8,13 +11,28 @@ import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents
 import System.FilePath (takeFileName)
 import System.IO ()
 
-testPrintFiles :: FilePath -> IO ()
-testPrintFiles path = extractFiles path >>= mapM_ putStrLn
+testExtractFiles :: FilePath -> IO ()
+testExtractFiles path = extractFiles path >>= mapM_ putStrLn
+
+testExtractTypeFiles :: FileType -> FilePath -> IO ()
+testExtractTypeFiles fType path = extractTypeFiles fType path >>= mapM_ putStrLn
 
 testMoveFiles :: [FilePath] -> FilePath -> IO ()
 testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
 
+type FileType = String
 newtype Directory = Directory FilePath
+
+extractTypeFiles :: FileType -> FilePath -> IO [FilePath]
+extractTypeFiles fType path = do
+    files <- extractFiles path
+    return $ filesFilter fType files
+
+{- |
+    Фильтрация по типу файла
+-}
+filesFilter :: FileType -> [FilePath] -> [FilePath]
+filesFilter fileType = filter $ \path -> fileType `endswith` path
 
 {-
     Алгоритм извлечения файлов из директорий:
@@ -64,12 +82,3 @@ oldAndNewPaths :: Directory -> [FilePath] -> [(FilePath, FilePath)]
 oldAndNewPaths (Directory dir) = map (\oldName -> (oldName, toNewName oldName))
   where
     toNewName file = dir <> takeFileName file
-
-{-
-    todo
-    2. Фильтрация по 1 условию получаемых файлов
--}
-type FileType = String
-
-filesFilter :: FileType -> [FilePath] -> [FilePath]
-filesFilter fileType = filter $ \path -> fileType `endswith` path
