@@ -9,7 +9,7 @@ import System.FilePath (takeFileName)
 import System.IO ()
 
 testPrintFiles :: FilePath -> IO ()
-testPrintFiles path = extractFilesPaths path >>= mapM_ putStrLn
+testPrintFiles path = extractFiles path >>= mapM_ putStrLn
 
 testMoveFiles :: [FilePath] -> FilePath -> IO ()
 testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
@@ -24,12 +24,12 @@ newtype Directory = Directory FilePath
     3. Иначе - переносим все файлы выше на уровень если этот уровень не корневой
     4. Если уровень родительский - ничего не делаем
 -}
-extractFilesPaths :: FilePath -> IO [FilePath]
-extractFilesPaths path = do
+extractFiles :: FilePath -> IO [FilePath]
+extractFiles path = do
     isDir <- doesDirectoryExist path
     isFile <- doesFileExist path
     if isDir
-        then getAllFilesPaths $ Directory path'
+        then getAllFiles $ Directory path'
         else
             if isFile
                 then return [path]
@@ -43,11 +43,11 @@ extractFilesPaths path = do
 {- |
     Получаем все файлы дерева директории (со всеми поддиректориями)
 -}
-getAllFilesPaths :: Directory -> IO [FilePath]
-getAllFilesPaths (Directory path) = do
+getAllFiles :: Directory -> IO [FilePath]
+getAllFiles (Directory path) = do
     contents <- getDirectoryContents path
     let fullPaths = map (path <>) $ withoutParentDirContents contents
-    mconcat $ map extractFilesPaths fullPaths
+    mconcat $ map extractFiles fullPaths
   where
     withoutParentDirContents = filter $ not . flip endswith ".."
 
