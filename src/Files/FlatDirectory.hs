@@ -37,13 +37,8 @@ extractTypeFiles fType path = do
 filesFilter :: FileType -> [FilePath] -> [FilePath]
 filesFilter fileType = filter $ \path -> fileType `endswith` path
 
-{-
-    Алгоритм извлечения файлов из директорий:
-    0. Проверяем все файлы уровня
-    1. Проверяем является ли файл директорией
-    2. Если да - вход в диреторию, выполнение п.0
-    3. Иначе - переносим все файлы выше на уровень если этот уровень не корневой
-    4. Если уровень родительский - ничего не делаем
+{- |
+    Извлечение файлов из дерева директорий
 -}
 extractFiles :: FilePath -> IO [FilePath]
 extractFiles path = do
@@ -62,7 +57,7 @@ extractFiles path = do
             else path <> "/"
 
 {- |
-    Получаем все файлы дерева директории (со всеми поддиректориями)
+    Получение всех файлов дерева директории (со всеми поддиректориями)
 -}
 getAllFiles :: Directory -> IO [FilePath]
 getAllFiles (Directory path) = do
