@@ -2,14 +2,19 @@ module Files.FlatDirectory (
     testExtractFiles,
     testMoveFiles,
     testExtractTypeFiles,
+    testMoveTypeFiles,
     extractFiles,
     extractTypeFiles,
+    moveFilesToDirectory,
+    moveTypeFilesToDirectory,
 ) where
 
 import Data.List.Utils (endswith)
 import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents, renameFile)
 import System.FilePath (takeFileName)
 import System.IO ()
+
+------------------------------------------------------------------------------------------------
 
 testExtractFiles :: FilePath -> IO ()
 testExtractFiles path = extractFiles path >>= mapM_ putStrLn
@@ -20,22 +25,14 @@ testExtractTypeFiles fType path = extractTypeFiles fType path >>= mapM_ putStrLn
 testMoveFiles :: [FilePath] -> FilePath -> IO ()
 testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
 
+testMoveTypeFiles :: FileType -> FilePath -> FilePath -> IO ()
+testMoveTypeFiles fType sourceDir goalDir =
+    moveTypeFilesToDirectory fType (Directory sourceDir) (Directory goalDir) >>= mapM_ putStrLn
+
+------------------------------------------------------------------------------------------------
+
 type FileType = String
 newtype Directory = Directory FilePath
-
--- todo добавить перемещение отфильтрованных по типу фалов
-
-extractTypeFiles :: FileType -> FilePath -> IO [FilePath]
-extractTypeFiles fType path = do
-    files <- extractFiles path
-    return $ filesFilter fType files
-
-{- |
-    Фильтрация по типу файла
-    -- todo заменить на проверку по типу файла
--}
-filesFilter :: FileType -> [FilePath] -> [FilePath]
-filesFilter fileType = filter $ \path -> fileType `endswith` path
 
 {- |
     Извлечение файлов из дерева директорий
@@ -57,15 +54,12 @@ extractFiles path = do
             else path <> "/"
 
 {- |
-    Получение всех файлов дерева директории (со всеми поддиректориями)
+    Извлечение файлов заданного типа из дерева директорий
 -}
-getAllFiles :: Directory -> IO [FilePath]
-getAllFiles (Directory path) = do
-    contents <- getDirectoryContents path
-    let fullPaths = map (path <>) $ withoutParentDirContents contents
-    mconcat $ map extractFiles fullPaths
-  where
-    withoutParentDirContents = filter $ not . flip endswith ".."
+extractTypeFiles :: FileType -> FilePath -> IO [FilePath]
+extractTypeFiles fType path = do
+    files <- extractFiles path
+    return $ filesFilter fType files
 
 {-
      Перемещение файлов в новую директорию
@@ -77,3 +71,30 @@ moveFilesToDirectory files (Directory dir) = do
   where
     oldNewPaths = map (\oldName -> (oldName, toNewName oldName)) files
     toNewName file = dir <> takeFileName file
+
+{-
+     Перемещение файлов заданного типа из указанной директории в новую
+-}
+moveTypeFilesToDirectory :: FileType -> Directory -> Directory -> IO [FilePath]
+moveTypeFilesToDirectory fType sourceDir goalDir = do
+    files <- getAllFiles sourceDir
+    let goalFiles = filesFilter fType files
+    moveFilesToDirectory goalFiles goalDir
+
+{- |
+    Получение всех файлов дерева директории (со всеми поддиректориями)
+-}
+getAllFiles :: Directory -> IO [FilePath]
+getAllFiles (Directory path) = do
+    contents <- getDirectoryContents path
+    let fullPaths = map (path <>) $ withoutParentDirContents contents
+    mconcat $ map extractFiles fullPaths
+  where
+    withoutParentDirContents = filter $ not . flip endswith ".."
+
+{- |
+    Фильтрация по типу файла
+    -- todo заменить на проверку по типу файла
+-}
+filesFilter :: FileType -> [FilePath] -> [FilePath]
+filesFilter fileType = filter $ \path -> fileType `endswith` path
