@@ -71,12 +71,9 @@ getAllFiles (Directory path) = do
      Перемещение файлов в новую директорию
 -}
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
-moveFilesToDirectory files dir = do
-    let oldNewPairs = oldAndNewPaths dir files
-    mapM_ (\(old, new) -> renameFile old new) oldNewPairs
-    return $ map snd oldNewPairs
-
-oldAndNewPaths :: Directory -> [FilePath] -> [(FilePath, FilePath)]
-oldAndNewPaths (Directory dir) = map (\oldName -> (oldName, toNewName oldName))
+moveFilesToDirectory files (Directory dir) = do
+    mapM_ (\(old, new) -> renameFile old new) oldNewPaths
+    return $ map snd oldNewPaths
   where
+    oldNewPaths = map (\oldName -> (oldName, toNewName oldName)) files
     toNewName file = dir <> takeFileName file
