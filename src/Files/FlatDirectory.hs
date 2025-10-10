@@ -5,7 +5,7 @@ module Files.FlatDirectory (
     testMoveTypeFiles,
     Directory,
     getTypeFiles,
-    moveTypeFilesToDirectory,
+    moveTypeFiles,
 ) where
 
 import Data.List.Utils (endswith)
@@ -26,7 +26,7 @@ testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ p
 
 testMoveTypeFiles :: FileType -> FilePath -> FilePath -> IO ()
 testMoveTypeFiles fType sourceDir goalDir =
-    moveTypeFilesToDirectory fType (Directory sourceDir) (Directory goalDir) >>= mapM_ putStrLn
+    moveTypeFiles fType (Directory sourceDir) (Directory goalDir) >>= mapM_ putStrLn
 
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
@@ -47,8 +47,8 @@ getTypeFiles fType (Directory path) = do
 {- |
      Перемещение файлов заданного типа из указанной директории в новую
 -}
-moveTypeFilesToDirectory :: FileType -> SourceDirectory -> GoalDirectory -> IO [FilePath]
-moveTypeFilesToDirectory fType source goal = do
+moveTypeFiles :: FileType -> SourceDirectory -> GoalDirectory -> IO [FilePath]
+moveTypeFiles fType source goal = do
     files <- getAllFiles source
     let goalFiles = filesFilter fType files
     moveFilesToDirectory goalFiles goal
