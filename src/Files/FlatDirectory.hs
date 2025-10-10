@@ -4,7 +4,7 @@ module Files.FlatDirectory (
     testExtractTypeFiles,
     testMoveTypeFiles,
     Directory,
-    extractTypeFiles,
+    getTypeFiles,
     moveTypeFilesToDirectory,
 ) where
 
@@ -19,7 +19,7 @@ testExtractFiles :: FilePath -> IO ()
 testExtractFiles path = extractFiles path >>= mapM_ putStrLn
 
 testExtractTypeFiles :: FileType -> FilePath -> IO ()
-testExtractTypeFiles fType path = extractTypeFiles fType (Directory path) >>= mapM_ putStrLn
+testExtractTypeFiles fType path = getTypeFiles fType (Directory path) >>= mapM_ putStrLn
 
 testMoveFiles :: [FilePath] -> FilePath -> IO ()
 testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
@@ -35,10 +35,10 @@ type FileType = String
 newtype Directory = Directory FilePath
 
 {- |
-    Извлечение файлов заданного типа из дерева директорий
+    Получение списка файлов заданного типа из дерева директорий
 -}
-extractTypeFiles :: FileType -> Directory -> IO [FilePath]
-extractTypeFiles fType (Directory path) = do
+getTypeFiles :: FileType -> Directory -> IO [FilePath]
+getTypeFiles fType (Directory path) = do
     files <- extractFiles path
     return $ filesFilter fType files
 
