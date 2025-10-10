@@ -33,6 +33,8 @@ testMoveTypeFiles fType sourceDir goalDir =
 
 type FileType = String
 newtype Directory = Directory FilePath
+type SourceDirectory = Directory
+type GoalDirectory = Directory
 
 {- |
     Получение списка файлов заданного типа из дерева директорий
@@ -45,11 +47,11 @@ getTypeFiles fType (Directory path) = do
 {- |
      Перемещение файлов заданного типа из указанной директории в новую
 -}
-moveTypeFilesToDirectory :: FileType -> Directory -> Directory -> IO [FilePath]
-moveTypeFilesToDirectory fType sourceDir goalDir = do
-    files <- getAllFiles sourceDir
+moveTypeFilesToDirectory :: FileType -> SourceDirectory -> GoalDirectory -> IO [FilePath]
+moveTypeFilesToDirectory fType source goal = do
+    files <- getAllFiles source
     let goalFiles = filesFilter fType files
-    moveFilesToDirectory goalFiles goalDir
+    moveFilesToDirectory goalFiles goal
 
 ------------------------------------------------------------------------------------------------
 
