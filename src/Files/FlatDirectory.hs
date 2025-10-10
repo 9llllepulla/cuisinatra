@@ -6,10 +6,11 @@ module Files.FlatDirectory (
     Directory,
     getTypeFiles,
     moveTypeFiles,
+    removeEmptyDirectoryTree,
 ) where
 
 import Data.List.Utils (endswith)
-import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents, renameFile)
+import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents, removeDirectoryRecursive, renameFile)
 import System.FilePath (takeFileName)
 import System.IO ()
 
@@ -53,7 +54,16 @@ moveTypeFiles fType source goal = do
     let goalFiles = filesFilter fType files
     moveFilesToDirectory goalFiles goal
 
+removeEmptyDirectoryTree :: GoalDirectory -> IO (Either String (IO ()))
+removeEmptyDirectoryTree (Directory dir) = do
+    isEmpty <- isEmptyDirTree dir
+    if isEmpty
+        then return $ Right $ removeDirectoryRecursive dir
+        else return $ Left ""
+
 ------------------------------------------------------------------------------------------------
+isEmptyDirTree :: FilePath -> IO Bool
+isEmptyDirTree path = undefined
 
 -- | Перемещение файлов в новую директорию
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
