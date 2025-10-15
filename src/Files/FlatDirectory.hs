@@ -10,7 +10,13 @@ module Files.FlatDirectory (
 ) where
 
 import Data.List.Utils (endswith)
-import System.Directory (doesDirectoryExist, doesFileExist, getDirectoryContents, removeDirectoryRecursive, renameFile)
+import System.Directory (
+    doesDirectoryExist,
+    doesFileExist,
+    listDirectory,
+    removeDirectoryRecursive,
+    renameFile,
+ )
 import System.FilePath (takeFileName)
 import System.IO ()
 
@@ -64,7 +70,15 @@ removeEmptyDirectoryTree rootDir@(Directory dir) = do
 
 ------------------------------------------------------------------------------------------------
 isEmptyDir :: Directory -> IO Bool
-isEmptyDir dir = undefined -- fixme
+isEmptyDir (Directory dir) = do
+    isExistsDir <- doesDirectoryExist dir
+    contents <- listDirectory dir
+    if not isExistsDir
+        then return False
+        else
+            if null contents
+                then return True
+                else undefined -- FIXME
 
 -- | Перемещение файлов в новую директорию
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
@@ -95,11 +109,9 @@ extractFiles path = do
 -- | Получение всех файлов дерева директории (со всеми поддиректориями)
 getAllFiles :: Directory -> IO [FilePath]
 getAllFiles (Directory path) = do
-    contents <- getDirectoryContents path
-    let fullPaths = map (path <>) $ withoutParentDirContents contents
+    contents <- listDirectory path
+    let fullPaths = map (path <>) contents
     mconcat $ map extractFiles fullPaths
-  where
-    withoutParentDirContents = filter $ not . flip endswith ".."
 
 -- | Фильтрация по типу файла
 filesFilter :: FileType -> [FilePath] -> [FilePath]

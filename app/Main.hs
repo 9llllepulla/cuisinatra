@@ -3,9 +3,12 @@ module Main (
 ) where
 
 import Cli (cliParser)
+import Files.FlatDirectory (testExtractFiles)
 import System.Environment (getArgs)
 
 main :: IO ()
 main = do
-    args <- getArgs
-    cliParser args
+    testExtractFiles "/home/gllllepulla/HaskellWorkSpace/test-content"
+
+{-args <- getArgs
+cliParser args-}
