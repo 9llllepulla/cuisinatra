@@ -33,7 +33,7 @@ testMoveTypeFiles fType sourceDir goalDir =
 ------------------------------------------------------------------------------------------------
 
 type FileType = String
-newtype Directory = Directory FilePath
+newtype Directory = Directory FilePath deriving (Show)
 type SourceDirectory = Directory
 type GoalDirectory = Directory
 
@@ -54,16 +54,17 @@ moveTypeFiles fType source goal = do
     let goalFiles = filesFilter fType files
     moveFilesToDirectory goalFiles goal
 
+--
 removeEmptyDirectoryTree :: GoalDirectory -> IO (Either String (IO ()))
-removeEmptyDirectoryTree (Directory dir) = do
-    isEmpty <- isEmptyDirTree dir
+removeEmptyDirectoryTree rootDir@(Directory dir) = do
+    isEmpty <- isEmptyDir rootDir
     if isEmpty
         then return $ Right $ removeDirectoryRecursive dir
-        else return $ Left ""
+        else return $ Left $ "Failed remove directory " <> show rootDir <> ". Directory isn't empty!"
 
 ------------------------------------------------------------------------------------------------
-isEmptyDirTree :: FilePath -> IO Bool
-isEmptyDirTree path = undefined
+isEmptyDir :: Directory -> IO Bool
+isEmptyDir dir = undefined -- fixme
 
 -- | Перемещение файлов в новую директорию
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
