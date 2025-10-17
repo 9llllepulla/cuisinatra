@@ -3,10 +3,11 @@ module Files.FlatDirectory (
     testMoveFiles,
     testExtractTypeFiles,
     testMoveTypeFiles,
+    testRemoveEmptyDir,
     Directory,
     getTypeFiles,
     moveTypeFiles,
-    removeEmptyDirectoryTree,
+    removeEmptyDirectory,
 ) where
 
 import Data.List.Utils (endswith)
@@ -14,7 +15,7 @@ import System.Directory (
     doesDirectoryExist,
     doesFileExist,
     listDirectory,
-    removeDirectoryRecursive,
+    removeDirectory,
     renameFile,
  )
 import System.FilePath (takeFileName)
@@ -34,6 +35,14 @@ testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ p
 testMoveTypeFiles :: FileType -> FilePath -> FilePath -> IO ()
 testMoveTypeFiles fType sourceDir goalDir =
     moveTypeFiles fType (Directory sourceDir) (Directory goalDir) >>= mapM_ putStrLn
+
+testRemoveEmptyDir :: FilePath -> IO ()
+testRemoveEmptyDir path = do
+    dirOrError <- removeEmptyDirectory (Directory path)
+    go dirOrError
+  where
+    go (Right dir) = dir >>= putStrLn
+    go (Left msg) = putStrLn msg
 
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
@@ -60,25 +69,24 @@ moveTypeFiles fType source goal = do
     let goalFiles = filesFilter fType files
     moveFilesToDirectory goalFiles goal
 
---
-removeEmptyDirectoryTree :: GoalDirectory -> IO (Either String (IO ()))
-removeEmptyDirectoryTree rootDir@(Directory dir) = do
+{- |
+    Удаление пустой директории
+-}
+removeEmptyDirectory :: GoalDirectory -> IO (Either String (IO FilePath))
+removeEmptyDirectory rootDir@(Directory dir) = do
     isEmpty <- isEmptyDir rootDir
     if isEmpty
-        then return $ Right $ removeDirectoryRecursive dir
+        then return $ Right $ removeDirectory dir >> return dir
         else return $ Left $ "Failed remove directory " <> show rootDir <> ". Directory isn't empty!"
 
 ------------------------------------------------------------------------------------------------
 isEmptyDir :: Directory -> IO Bool
 isEmptyDir (Directory dir) = do
-    isExistsDir <- doesDirectoryExist dir
+    isDir <- doesDirectoryExist dir
     contents <- listDirectory dir
-    if not isExistsDir
+    if not isDir
         then return False
-        else
-            if null contents
-                then return True
-                else undefined -- FIXME
+        else return $ null contents
 
 -- | Перемещение файлов в новую директорию
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
