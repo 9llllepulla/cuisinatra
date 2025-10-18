@@ -11,6 +11,7 @@ module Files.FlatDirectory (
     isEmptyDir,
 ) where
 
+import Data.Functor ((<&>))
 import Data.List.Utils (endswith)
 import System.Directory (
     doesDirectoryExist,
@@ -87,12 +88,8 @@ isEmptyDir (Directory dir) = do
     isExist <- doesPathExist dir
     isDir <- doesDirectoryExist dir
     if isExist && isDir
-        then checkContents
+        then listDirectory dir <&> null
         else return False
-  where
-    checkContents = do
-        contents <- listDirectory dir
-        return $ null contents
 
 -- | Перемещение файлов в новую директорию
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
