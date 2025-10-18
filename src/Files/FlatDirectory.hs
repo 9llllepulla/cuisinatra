@@ -1,6 +1,5 @@
 module Files.FlatDirectory (
     testExtractFiles,
-    testMoveFiles,
     testExtractTypeFiles,
     testMoveTypeFiles,
     testRemoveEmptyDir,
@@ -8,7 +7,6 @@ module Files.FlatDirectory (
     getTypeFiles,
     moveTypeFiles,
     removeEmptyDirectory,
-    isEmptyDir,
 ) where
 
 import Data.Functor ((<&>))
@@ -31,9 +29,6 @@ testExtractFiles path = extractFiles path >>= mapM_ putStrLn
 
 testExtractTypeFiles :: FileType -> FilePath -> IO ()
 testExtractTypeFiles fType path = getTypeFiles fType (Directory path) >>= mapM_ putStrLn
-
-testMoveFiles :: [FilePath] -> FilePath -> IO ()
-testMoveFiles files dir = moveFilesToDirectory files (Directory dir) >>= mapM_ putStrLn
 
 testMoveTypeFiles :: FileType -> FilePath -> FilePath -> IO ()
 testMoveTypeFiles fType sourceDir goalDir =
@@ -83,6 +78,11 @@ removeEmptyDirectory rootDir@(Directory dir) = do
         else return $ Left $ "Failed remove directory " <> show rootDir <> ". Directory isn't empty!"
 
 ------------------------------------------------------------------------------------------------
+
+{- |
+    return True если валидный путь, директория существует
+    и не содержит файлы или другие директории
+-}
 isEmptyDir :: Directory -> IO Bool
 isEmptyDir (Directory dir) = do
     isExist <- doesPathExist dir
