@@ -4,16 +4,18 @@ module Files.FlatDirectory (
     testExtractTypeFiles,
     testMoveTypeFiles,
     testRemoveEmptyDir,
-    Directory,
+    Directory (..),
     getTypeFiles,
     moveTypeFiles,
     removeEmptyDirectory,
+    isEmptyDir,
 ) where
 
 import Data.List.Utils (endswith)
 import System.Directory (
     doesDirectoryExist,
     doesFileExist,
+    doesPathExist,
     listDirectory,
     removeDirectory,
     renameFile,
@@ -82,11 +84,15 @@ removeEmptyDirectory rootDir@(Directory dir) = do
 ------------------------------------------------------------------------------------------------
 isEmptyDir :: Directory -> IO Bool
 isEmptyDir (Directory dir) = do
+    isExist <- doesPathExist dir
     isDir <- doesDirectoryExist dir
-    contents <- listDirectory dir
-    if not isDir
-        then return False
-        else return $ null contents
+    if isExist && isDir
+        then checkContents
+        else return False
+  where
+    checkContents = do
+        contents <- listDirectory dir
+        return $ null contents
 
 -- | Перемещение файлов в новую директорию
 moveFilesToDirectory :: [FilePath] -> Directory -> IO [FilePath]
