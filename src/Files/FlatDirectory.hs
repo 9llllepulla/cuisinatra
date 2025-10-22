@@ -1,3 +1,13 @@
+----------------------------------------------------------------------------------------------
+{-
+    Модуль работы с директориями:
+      - Получение списка файлов из дерева директорий
+      - Получение списка файлов заданного типа из дерева директорий
+      - Перемещение файлов заданного типа из указанной директории в новую
+      - Удаление пустой директории
+
+-}
+----------------------------------------------------------------------------------------------
 module Files.FlatDirectory (
     Directory (..),
     FileType,
@@ -32,6 +42,25 @@ type SourceDirectory = Directory
 type GoalDirectory = Directory
 
 {- |
+    Получение списка файлов из дерева директорий
+-}
+extractFiles :: FilePath -> IO [FilePath]
+extractFiles path = do
+    isDir <- doesDirectoryExist path
+    isFile <- doesFileExist path
+    if isDir
+        then getAllFiles $ Directory path'
+        else
+            if isFile
+                then return [path]
+                else return []
+  where
+    path' =
+        if "/" `endswith` path
+            then path
+            else path <> "/"
+
+{- |
     Получение списка файлов заданного типа из дерева директорий
 -}
 getTypeFiles :: FileType -> Directory -> IO [FilePath]
@@ -57,25 +86,6 @@ removeEmptyDirectory rootDir@(Directory dir) = do
     if isEmpty
         then return $ Right $ removeDirectory dir >> return dir
         else return $ Left $ "Failed remove directory " <> show rootDir <> ". Directory isn't empty!"
-
-{- |
-    Извлечение файлов из дерева директорий
--}
-extractFiles :: FilePath -> IO [FilePath]
-extractFiles path = do
-    isDir <- doesDirectoryExist path
-    isFile <- doesFileExist path
-    if isDir
-        then getAllFiles $ Directory path'
-        else
-            if isFile
-                then return [path]
-                else return []
-  where
-    path' =
-        if "/" `endswith` path
-            then path
-            else path <> "/"
 
 ------------------------------------------------------------------------------------------------
 
