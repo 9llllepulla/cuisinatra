@@ -30,7 +30,7 @@ testMoveTypeFiles fType sourceDir goalDir =
 testRemoveEmptyDir :: FilePath -> IO ()
 testRemoveEmptyDir path = do
     dirOrError <- removeEmptyDirectory (Directory path)
-    go dirOrError
+    printThis dirOrError
   where
-    go (Right dir) = dir >>= putStrLn
-    go (Left msg) = putStrLn msg
+    printThis (Right dir) = dir >>= putStrLn
+    printThis (Left msg) = putStrLn msg

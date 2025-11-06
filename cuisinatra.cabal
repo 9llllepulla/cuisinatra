@@ -28,6 +28,7 @@ library
       Cli
       Files.FileTranslator
       Files.FlatDirectory
+      Files.PicFiles
   other-modules:
       Paths_cuisinatra
   autogen-modules:
